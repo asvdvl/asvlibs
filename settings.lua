@@ -4,7 +4,7 @@ local fs = require("filesystem")
 local defaultFileLocation = "/etc/settings/"
 local defaultFileExtension = ".set"
 
-function checkPath(settingsFileName)
+local function checkPath(settingsFileName)
 	--check on absolute path
 	if string.sub(settingsFileName, 1, 1) ~= "/" then
 		settingsFileName = fs.concat(defaultFileLocation, settingsFileName)
@@ -26,9 +26,10 @@ function checkPath(settingsFileName)
 	return settingsFileName
 end
 
-function verifyAndCorrectStructure(fileTab, defTab)
+local function verifyAndCorrectStructure(fileTab, defTab)
 	fileTab = setmetatable(fileTab, {__index = defTab})
-	fileTabNew = {}
+	local fileTabNew = {}
+	local needRewrite
 	for key, val in pairs(defTab) do 
 		if not rawget(fileTab, key) then
 			needRewrite = true
@@ -40,7 +41,7 @@ end
 
 function settings.getSettings(settingsFileName, defaultSettings, dontCorrectStructure)
 	checkArg(1, settingsFileName, "string")
-	settingsFileName, reason = checkPath(settingsFileName)
+	local settingsFileName, reason = checkPath(settingsFileName)
 	
 	--check if checkPath return error
 	if reason then
@@ -89,7 +90,7 @@ function settings.setSettings(settingsFileName, newSettings)
 	checkArg(2, newSettings, "nil", "boolean", "number", "string", "table")
 	
 	--check if checkPath return error
-	settingsFileName, reason = checkPath(settingsFileName)
+	local settingsFileName, reason = checkPath(settingsFileName)
 	if reason then
 		return false, reason
 	end

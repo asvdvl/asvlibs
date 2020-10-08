@@ -1,7 +1,7 @@
 local time = {}
 local filePath = "/tmp/.time"
 
-function getCurrent()
+function time.getCurrent()
 
 end
 
