@@ -72,7 +72,7 @@ end
 ---@param verifiableTable table
 ---@param templateTable table
 ---return table new table and boolean 
-function asvutils.checkTableStructure(verifiableTable, templateTable)
+function asvutils.correctTableStructure(verifiableTable, templateTable)
 	verifiableTable = setmetatable(verifiableTable, {__index = templateTable})
 	local virTabNew = {}
 	local wasChanged = false
