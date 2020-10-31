@@ -70,7 +70,7 @@ function settings.getSettings(settingsFileName, defaultSettings, dontCorrectStru
 	--correct structure with defaultSettings
 	if not reason and type(defaultSettings) == "table" and not dontCorrectStructure then
 		local needRewrite = false
-		if type(var) == table then
+		if type(var) == "table" then
 			var, needRewrite = verifyAndCorrectStructure(var, defaultSettings)
 		else
 			local status, reason = settings.setSettings(settingsFileName, defaultSettings)
