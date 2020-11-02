@@ -2,7 +2,7 @@ local settings = {}
 local srl = require("serialization")
 local fs = require("filesystem")
 local defaultFileLocation = "/etc/settings/"
-local defaultFileExtension = ".set"
+local defaultFileExtension = ".cfg"
 
 local function checkPath(settingsFileName)
 	--check on absolute path
