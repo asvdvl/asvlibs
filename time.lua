@@ -7,17 +7,17 @@ local function getTimeZoneOffset(timeZone)
 	return timeZone * 3600
 end
 
-local function getCurrent(timeZone)
+function time.getRaw()
 	io.open(filePath, "w"):write(""):close()
-	return tonumber(string.sub(fs.lastModified(filePath), 1, -6)) + getTimeZoneOffset(timeZone)
+	return fs.lastModified(filePath)
 end
 
 function time.getUNIX(timeZone)
-	return getCurrent(timeZone)
+	return tonumber(string.sub(time.getRaw(), 1, -6)) + getTimeZoneOffset(timeZone)
 end
 
 function time.getBySpecificFormat(format, timeZone)
-	return os.date(format, getCurrent(timeZone))
+	return os.date(format, time.getUNIX(timeZone))
 end
 
 function time.getTime(timeZone)
