@@ -259,6 +259,21 @@ local function dbg(...)
                 end
             elseif params[1] == "bt" then
                 backtrace(level + getLevel(dbg) + 1, level)
+            elseif params[1] == "print" then
+                --print table
+                local printTable = environment[params[2]]
+                if type(printTable) == "table" then
+                    print("key:value, "..#printTable.." rows detected")
+                    local rowCounter = 0
+                    for key, value in pairs(printTable) do
+                        print(rowCounter .."\t".. tostring(key) .. "\t:\t" .. tostring(value))
+                        rowCounter = rowCounter + 1
+                    end
+                    --#printTable may return a number of lines that is not true (e.g., try to output _G or _ENV).
+                    print("Contain "..rowCounter.." rows")
+                else
+                    print("Usage: \":print table\"")
+                end
             end
         else
             local ok, err = load("return " .. input, "=debug", "t", environment)
