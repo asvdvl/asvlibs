@@ -1,19 +1,27 @@
 --TODO
---[]download libs
+--[v]download libs
 --[]update libs
 --[]can store the file until the reboot
---[v]no load all
 --vars
 local var = {...}
+local loading = {}
+local cmp = require("component")
 local this = {_NOTE = "This table not empty! libraries are loading by accessing their name, via table.library"}
-local internet = require("internet")
+--wget instance
+local wget = loadfile("/bin/wget.lua")
+local fs = require("filesystem")
 
 --settings
 local st = {
-    shortUrl = "https://raw.githubusercontent.com/asvdvl/asvlibs/master/asv/",
-    listURL = "https://raw.githubusercontent.com/asvdvl/asvlibs/master/downloadList.txt",
+    mainDirUrl = "https://raw.githubusercontent.com/asvdvl/asvlibs/master/asv/", --for git
+    listURL = "https://raw.githubusercontent.com/asvdvl/asvlibs/master/downloadList.txt", --for git
+    --mainDirUrl = "http://l.l/",   --tests
+    --listURL = "http://l.l/downloadList.txt",   --tests
+    listTempLocation = "/tmp/downloadList.txt",
     downloadIfNotExist = true,
-    startupMessage = true
+    startupMessage = true,
+    log = true,
+    debugMessages = true
 }
 
 if st.startupMessage then
@@ -21,23 +29,59 @@ if st.startupMessage then
     io.stdout:write("if you want to disable this message, change the startupMessage variable in the settings table of the asv/init.lua file\n")
 end
 
-local function downloadFile(package)
-    local handle = internet.request(st.listURL)
-    local result = ""
-    for chunk in handle do
-        result = result..chunk
+
+local function dbgLog(message)
+    if st.debugMessages then
+        io.stdout:write("[dbg]"..message.."\n")
+    end
+end
+
+local function log(message)
+    if st.log then
+        io.stdout:write(message.."\n")
+    end
+end
+
+if not cmp.isAvailable("internet") then
+    log("Warning: The Internet card is not detected. Some functions may not work")
+end
+
+local function downloadFile(module)
+    local success, message
+
+    --download repository list
+    dbgLog("try to get repository list")
+    success, message = wget("-fq", st.listURL, st.listTempLocation)
+    assert(success, message)
+
+    --try to find the necessary package in the repository
+    dbgLog("try to parse data")
+    local _, _, libname, updateTime = string.find(io.open(st.listTempLocation):read("*a"), module..";(.+);(%d+)")
+    assert(libname, "package not found in the repository index file")
+
+    --download file
+    local path = fs.path(package.searchpath(var[1], package.path))       --some kludge for get current library path
+    success, message = wget("-f", st.mainDirUrl..libname, path..module..".lua")
+    if not success then
+        fs.remove(path..module..".lua")
+        error(message)
     end
 
+    dbgLog("Last update: "..updateTime)
 end
 
 local function getLibrary(table, key)
     local path = package.searchpath(var[1].."."..key, package.path)
-    if not path then
-        downloadFile(var[1])
+
+    if cmp.isAvailable("internet") and not path and st.downloadIfNotExist then
+        log("package \""..key.."\" is not found. trying to get it from the repository.")
+        downloadFile(key)
+    elseif not cmp.isAvailable("internet") then --just for log
+        log("Internet card not found, download skipped")
     end
 
     table[key] = require(var[1].."."..key)
-    return table[key]
+    return rawget(table, key)
 end
 
 --set metatable
