@@ -56,7 +56,7 @@ local function downloadFile(module)
 
     --try to find the necessary package in the repository
     dbgLog("try to parse data")
-    local _, _, libname, updateTime = string.find(io.open(st.listTempLocation):read("*a"), module..";(.+);(%d+)")
+    local _, _, libname, updateTime = string.find(io.open(st.listTempLocation):read("*a"), module..";([A-Za-z0-9.]+);(%d+)")
     assert(libname, "package not found in the repository index file")
 
     --download file
@@ -64,7 +64,7 @@ local function downloadFile(module)
     success, message = wget("-f", st.mainDirUrl..libname, path..module..".lua")
     if not success then
         fs.remove(path..module..".lua")
-        error(message)
+        error("Error while download file by URL: "..st.mainDirUrl..libname..". "..message)
     end
 
     dbgLog("Last update: "..updateTime)
