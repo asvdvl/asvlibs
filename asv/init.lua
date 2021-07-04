@@ -1,7 +1,6 @@
 --TODO
---[v]download libs
 --[]update libs
---[]can store the file until the reboot
+--[v]redownload on each require
 --vars
 local var = {...}
 local loading = {}
@@ -21,7 +20,10 @@ local st = {
     downloadIfNotExist = true,
     startupMessage = true,
     log = true,
-    debugMessages = true
+    debug = {
+        log = false,
+        redownloadOnEachRequire = false
+    }
 }
 
 if st.startupMessage then
@@ -31,7 +33,7 @@ end
 
 
 local function dbgLog(message)
-    if st.debugMessages then
+    if st.debug.log then
         io.stdout:write("[dbg]"..message.."\n")
     end
 end
@@ -73,10 +75,12 @@ end
 local function getLibrary(table, key)
     local path = package.searchpath(var[1].."."..key, package.path)
 
-    if cmp.isAvailable("internet") and not path and st.downloadIfNotExist then
-        log("package \""..key.."\" is not found. trying to get it from the repository.")
-        downloadFile(key)
-    elseif not cmp.isAvailable("internet") then --just for log
+    if cmp.isAvailable("internet") then
+        if st.debug.redownloadOnEachRequire or (not path and st.downloadIfNotExist) then
+            dbgLog("package \""..key.."\" is not found. trying to get it from the repository.")
+            downloadFile(key)
+        end
+    else
         log("Internet card not found, download skipped")
     end
 
@@ -85,6 +89,6 @@ local function getLibrary(table, key)
 end
 
 --set metatable
-this = setmetatable({}, {__index = getLibrary, __call = getLibrary})
+this = setmetatable(this, {__index = getLibrary, __call = getLibrary})
 
 return this
