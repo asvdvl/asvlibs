@@ -22,7 +22,7 @@ local st = {
     log = true,
     debug = {
         log = false,
-        redownloadOnEachRequire = false
+        redownloadOnEachRequire = false --work when you try get module via call main(this) file
     }
 }
 
@@ -84,6 +84,7 @@ local function getLibrary(table, key)
         log("Internet card not found, download skipped")
     end
 
+    package.loaded[var[1]][key] = nil   --reset loaded module
     table[key] = require(var[1].."."..key)
     return rawget(table, key)
 end
