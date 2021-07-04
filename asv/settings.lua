@@ -112,7 +112,7 @@ function settings.setSettings(settingsFileName, newSettings)
 	end
 
 	--write to file
-	file:write(srl.serialize(newSettings))  --DATA
+	file:write(srl.serialize(newSettings, math.maxinteger))  --DATA
 	file:close()
 
 	return true
