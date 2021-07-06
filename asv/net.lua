@@ -2,7 +2,17 @@ local cmp = require("component")
 local event = require("event")
 
 local this = {}
-this.l2 = {}
+this.l2 = {
+    frameItem = {
+        protocol = "",
+        data = ""
+    },
+    phys = {},
+    protocols = {
+        asvnetl2 = {},
+        arp = {}
+    }
+}
 local port = 1 --constant
 
 --Init
@@ -12,7 +22,9 @@ end
 
 local function eventComponentAddedProcessing(_, addr, componentType)
     if componentType == "modem" then
-        cmp.proxy(addr).open(port)
+        if not cmp.proxy(addr).open(port) then
+            print("Failed to open port on modem "..addr)
+        end
     end
 end
 
@@ -26,20 +38,21 @@ local function getModemFromAddress(addr)
     return cmp.modem
 end
 
-function this.l2.broadcastViaAll(...)
+function this.l2.phys.broadcastViaAll(...)
     for addr in pairs(cmp.list("modem")) do
         cmp.proxy(addr).broadcast(port, ...)
     end
 end
 
-function this.l2.broadcast(srcAddr, ...)
+function this.l2.phys.broadcast(srcAddr, ...)
     checkArg(1, srcAddr, "string", "nil")
-    getModemFromAddress(srcAddr).broadcast(port, ...)
+    return getModemFromAddress(srcAddr).broadcast(port, ...)
 end
 
-function this.l2.send(srcAddr, dctAddr, ...)
+function this.l2.phys.send(srcAddr, dstAddr, ...)
     checkArg(1, srcAddr, "string", "nil")
-    getModemFromAddress(srcAddr).send(dctAddr, port, ...)
+    checkArg(2, dstAddr, "string")
+    return getModemFromAddress(srcAddr).send(dctAddr, port, ...)
 end
 
 return this
