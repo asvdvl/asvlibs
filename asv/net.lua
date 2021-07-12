@@ -3,11 +3,12 @@ local event = require("event")
 
 local this = {}
 this.l2 = {
-    frameItem = {
-        protocol = "",
-        data = ""
+    phys = {
+        frameItem = {
+            protocol = "",
+            data = ""
+        },
     },
-    phys = {},
     protocols = {
         asvnetl2 = {},
         arp = {}
@@ -15,44 +16,88 @@ this.l2 = {
 }
 local port = 1 --constant
 
---Init
-for addr in pairs(cmp.list("modem")) do
-    cmp.proxy(addr).open(port)
+--Init modem and tunnel, universalize apis
+local function modemInit(modem)
+    if not modem.open(port) then
+        print("Failed to open port on modem "..addr)
+    end
+    modem.asvnet = {}
+    modem.asvnet.send = function (dstAddr, ...)
+        return modem.send(dstAddr, port, ...)
+    end
+    modem.asvnet.broadcast = function (...)
+        return modem.broadcast(port, ...)
+    end
 end
 
+local function tunnelInit(tunnel)
+    tunnel.asvnet = {}
+    tunnel.asvnet.send = function (dstAddr, ...)    --dstAddr not using for send via linked card(need for universalize api)
+        return tunnel.send(...)
+    end
+    tunnel.asvnet.broadcast = function (...)
+        return tunnel.send(...)
+    end
+end
+
+for addr in pairs(cmp.list("modem")) do
+    local modem = cmp.proxy(addr)
+    modemInit(modem)
+end
+
+for addr in pairs(cmp.list("tunnel")) do
+    local tunnel = cmp.proxy(addr)
+    tunnelInit(tunnel)
+end
+
+--event handler for initializing modems after startup
 local function eventComponentAddedProcessing(_, addr, componentType)
+    local device = cmp.proxy(addr)
     if componentType == "modem" then
-        if not cmp.proxy(addr).open(port) then
-            print("Failed to open port on modem "..addr)
-        end
+        modemInit(device)
+    elseif componentType == "tunnel" then
+        tunnelInit(device)
     end
 end
 
 event.listen("component_added", eventComponentAddedProcessing)
 
 --L2
-local function getModemFromAddress(addr)
+local function getModemFromAddress(addr, doNotTakeByDefault)    --doNotTakeByDefault was left experimentally, may be removed in the future 
     if addr then
         return cmp.proxy(cmp.get(addr))
     end
-    return cmp.modem
+    if not dontTakeByDefault then
+        if cmp.isAvailable("modem") then
+            return cmp.modem
+        elseif cmp.isAvailable("tunnel") then
+            return cmp.tunnel
+        else
+            error("this library needs a modem or tunnel component to work.")
+        end
+    else
+        error("component not found")
+    end
 end
 
 function this.l2.phys.broadcastViaAll(...)
     for addr in pairs(cmp.list("modem")) do
-        cmp.proxy(addr).broadcast(port, ...)
+        this.l2.phys.broadcast(addr, ...)
+    end
+    for addr in pairs(cmp.list("tunnel")) do
+        this.l2.phys.broadcast(addr, ...)
     end
 end
 
 function this.l2.phys.broadcast(srcAddr, ...)
     checkArg(1, srcAddr, "string", "nil")
-    return getModemFromAddress(srcAddr).broadcast(port, ...)
+    return getModemFromAddress(srcAddr).asvnet.broadcast(...)
 end
 
 function this.l2.phys.send(srcAddr, dstAddr, ...)
     checkArg(1, srcAddr, "string", "nil")
     checkArg(2, dstAddr, "string")
-    return getModemFromAddress(srcAddr).send(dctAddr, port, ...)
+    return getModemFromAddress(srcAddr).asvnet.send(dstAddr, ...)
 end
 
 return this
