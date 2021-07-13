@@ -63,41 +63,43 @@ end
 event.listen("component_added", eventComponentAddedProcessing)
 
 --L2
-local function getModemFromAddress(addr, doNotTakeByDefault)    --doNotTakeByDefault was left experimentally, may be removed in the future 
-    if addr then
-        return cmp.proxy(cmp.get(addr))
-    end
-    if not dontTakeByDefault then
-        if cmp.isAvailable("modem") then
-            return cmp.modem
-        elseif cmp.isAvailable("tunnel") then
-            return cmp.tunnel
-        else
-            error("this library needs a modem or tunnel component to work.")
+this.l2.phys = {
+    getModemFromAddress = function (addr, doNotTakeByDefault)    --doNotTakeByDefault was left experimentally, may be removed in the future 
+        if addr then
+            return cmp.proxy(cmp.get(addr))
         end
-    else
-        error("component not found")
-    end
-end
+        if not dontTakeByDefault then
+            if cmp.isAvailable("modem") then
+                return cmp.modem
+            elseif cmp.isAvailable("tunnel") then
+                return cmp.tunnel
+            else
+                error("this library needs a modem or tunnel component to work.")
+            end
+        else
+            error("component not found")
+        end
+    end,
 
-function this.l2.phys.broadcastViaAll(...)
-    for addr in pairs(cmp.list("modem")) do
-        this.l2.phys.broadcast(addr, ...)
-    end
-    for addr in pairs(cmp.list("tunnel")) do
-        this.l2.phys.broadcast(addr, ...)
-    end
-end
+    broadcastViaAll = function (...)
+        for addr in pairs(cmp.list("modem")) do
+            this.l2.phys.broadcast(addr, ...)
+        end
+        for addr in pairs(cmp.list("tunnel")) do
+            this.l2.phys.broadcast(addr, ...)
+        end
+    end,
 
-function this.l2.phys.broadcast(srcAddr, ...)
-    checkArg(1, srcAddr, "string", "nil")
-    return getModemFromAddress(srcAddr).asvnet.broadcast(...)
-end
+    broadcast = function (srcAddr, ...)
+        checkArg(1, srcAddr, "string", "nil")
+        return this.l2.phys.getModemFromAddress(srcAddr).asvnet.broadcast(...)
+    end,
 
-function this.l2.phys.send(srcAddr, dstAddr, ...)
-    checkArg(1, srcAddr, "string", "nil")
-    checkArg(2, dstAddr, "string")
-    return getModemFromAddress(srcAddr).asvnet.send(dstAddr, ...)
-end
+    send = function (srcAddr, dstAddr, ...)
+        checkArg(1, srcAddr, "string", "nil")
+        checkArg(2, dstAddr, "string")
+        return this.l2.phys.getModemFromAddress(srcAddr).asvnet.send(dstAddr, ...)
+    end
+}
 
 return this
