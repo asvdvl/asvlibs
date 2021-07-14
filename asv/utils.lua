@@ -1,8 +1,8 @@
-local asvutils = {}
+local utils = {}
 
 ---@param table table
 ---return reverse table
-function asvutils.reverseTable(table)
+function utils.reverseTable(table)
 	checkArg(1, table, "table")
 	local newTable = {}
     for k, v in ipairs(table) do
@@ -13,7 +13,7 @@ end
 
 ---@param bytes table
 ---return integer
-function asvutils.concatinateBytes(bytes)
+function utils.concatinateBytes(bytes)
 	local concatNum = 0
 	for _, val in pairs(bytes) do
 		concatNum = val|(concatNum<<(8))
@@ -23,7 +23,7 @@ end
 
 ---@param strings table
 ---return string
-function asvutils.concatinateStrings(strings)
+function utils.concatinateStrings(strings)
 	local concatStr = ""
 	for _, val in pairs(strings) do
 		concatStr = concatStr..val
@@ -34,7 +34,7 @@ end
 ---@param num integer
 ---@param length integer
 ---return table of bytes
-function asvutils.splitIntoBytes(num, length)
+function utils.splitIntoBytes(num, length)
 	--Counting bytes
 	local bytesCount = 0
 	if not length then
@@ -54,13 +54,13 @@ function asvutils.splitIntoBytes(num, length)
 		num = num >> 8
 	end
 
-	return asvutils.reverseTable(bytes)
+	return utils.reverseTable(bytes)
 end
 
 ---@param text string
 ---@param chunkSize integer
 ---return table of chunks
-function asvutils.splitByChunk(text, chunkSize)
+function utils.splitByChunk(text, chunkSize)
 	local chunks = {}
 	for i = 1, math.ceil(text:len() / chunkSize) do
 		chunks[i] = text:sub(1, chunkSize)
@@ -72,7 +72,7 @@ end
 ---@param verifiableTable table
 ---@param templateTable table
 ---return table new table and boolean 
-function asvutils.correctTableStructure(verifiableTable, templateTable)
+function utils.correctTableStructure(verifiableTable, templateTable)
 	verifiableTable = setmetatable(verifiableTable, {__index = templateTable})
 	local virTabNew = {}
 	local wasChanged = false
@@ -87,7 +87,7 @@ end
 
 ---@param msg string
 ---@param yes boolean
-function asvutils.confirmAction(msg, yes)
+function utils.confirmAction(msg, yes)
 	if not yes then
 		if not msg then
 			msg = "Do you confirm this action?"
@@ -104,4 +104,28 @@ function asvutils.confirmAction(msg, yes)
 	return true
 end
 
-return asvutils
+---@param orig table
+function utils.deepcopy(orig)	--copied from http://lua-users.org/wiki/CopyTable
+    local copy
+    if type(orig) == 'table' then
+        copy = {}
+        for orig_key, orig_value in next, orig, nil do
+            copy[utils.deepcopy(orig_key)] = utils.deepcopy(orig_value)
+        end
+        setmetatable(copy, utils.deepcopy(getmetatable(orig)))
+    else -- number, string, boolean, etc
+        copy = orig
+    end
+    return copy
+end
+
+---@param table1 table
+---@param table2 table
+function utils.concatTables(table1, table2)
+    for key, value in pairs(table2) do
+		table1[key] = value
+	end
+	return table1
+end
+
+return utils
