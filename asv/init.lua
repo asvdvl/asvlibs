@@ -38,14 +38,18 @@ local function dbgLog(message)
     end
 end
 
-local function log(message)
+local function log(message, error)
     if st.log then
-        io.stdout:write(message.."\n")
+        if error then
+            io.stderr:write(message.."\n")
+        else
+            io.stdout:write(message.."\n")
+        end
     end
 end
 
 if not cmp.isAvailable("internet") then
-    log("Warning: The Internet card is not detected. Some functions may not work")
+    log("Warning: The Internet card is not detected. Some functions may not work", true)
 end
 
 local function downloadFile(module)
@@ -81,7 +85,7 @@ local function getLibrary(table, key)
             downloadFile(key)
         end
     else
-        log("Internet card not found, download skipped")
+        log("Internet card not found, download skipped", true)
     end
 
     package.loaded[var[1]][key] = nil   --reset loaded module

@@ -119,4 +119,13 @@ function utils.deepcopy(orig)	--copied from http://lua-users.org/wiki/CopyTable
     return copy
 end
 
+---@param table1 table
+---@param table2 table
+function utils.concatTables(table1, table2)
+    for key, value in pairs(table2) do
+		table1[key] = value
+	end
+	return table1
+end
+
 return utils

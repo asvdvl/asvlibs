@@ -112,7 +112,7 @@ function settings.setSettings(settingsFileName, newSettings)
 	end
 
 	--write to file
-	file:write(srl.serialize(newSettings, math.maxinteger))  --DATA
+	file:write(srl.serialize(newSettings, math.maxinteger or 100000))  --DATA	`100000` is a Kludge for lua 5.2
 	file:close()
 
 	return true
