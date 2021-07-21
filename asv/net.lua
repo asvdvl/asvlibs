@@ -127,23 +127,26 @@ function net.l2.broadcastViaAll(protocol, data)
     assert(success, srl.serialize(reason, math.maxinteger))
 end
 
-function net.l2.broadcast(protocol, data, )
+function net.l2.broadcast(protocol, data, srcAddr)
     checkArg(1, protocol, "string")
     checkArg(2, data, "string")
+    checkArg(3, srcAddr, "string", "nil")
     local frame = utils.deepcopy(net.l2.frameItem)
     frame.protocol = protocol
     frame.data = data
-    local success, reason = net.l2.phys.broadcast(srl.serialize(frame))
+    local success, reason = net.l2.phys.broadcast(srcAddr, srl.serialize(frame))
     assert(success, reason)
 end
 
-function net.l2.send(protocol, data)
+function net.l2.send(protocol, data, srcAddr, dstAddr)
     checkArg(1, protocol, "string")
     checkArg(2, data, "string")
+    checkArg(3, srcAddr, "string", "nil")
+    checkArg(4, dstAddr, "string")
     local frame = utils.deepcopy(net.l2.frameItem)
     frame.protocol = protocol
     frame.data = data
-    local success, reason = net.l2.phys.send(srl.serialize(frame))
+    local success, reason = net.l2.phys.send(srcAddr, dstAddr, srl.serialize(frame))
     assert(success, reason)
 end
 
