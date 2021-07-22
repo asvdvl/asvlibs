@@ -5,10 +5,10 @@ local utils = {}
 function utils.reverseTable(table)
 	checkArg(1, table, "table")
 	local newTable = {}
-    for k, v in ipairs(table) do
-        newTable[#table + 1 - k] = v
-    end
-    return newTable
+	for k, v in ipairs(table) do
+		newTable[#table + 1 - k] = v
+	end
+	return newTable
 end
 
 ---@param bytes table
@@ -106,23 +106,23 @@ end
 
 ---@param orig table
 function utils.deepcopy(orig)	--copied from http://lua-users.org/wiki/CopyTable
-    local copy
-    if type(orig) == 'table' then
-        copy = {}
-        for orig_key, orig_value in next, orig, nil do
-            copy[utils.deepcopy(orig_key)] = utils.deepcopy(orig_value)
-        end
-        setmetatable(copy, utils.deepcopy(getmetatable(orig)))
-    else -- number, string, boolean, etc
-        copy = orig
-    end
-    return copy
+	local copy
+	if type(orig) == 'table' then
+		copy = {}
+		for orig_key, orig_value in next, orig, nil do
+			copy[utils.deepcopy(orig_key)] = utils.deepcopy(orig_value)
+		end
+		setmetatable(copy, utils.deepcopy(getmetatable(orig)))
+	else -- number, string, boolean, etc
+		copy = orig
+	end
+	return copy
 end
 
 ---@param table1 table
 ---@param table2 table
 function utils.concatTables(table1, table2)
-    for key, value in pairs(table2) do
+	for key, value in pairs(table2) do
 		table1[key] = value
 	end
 	return table1

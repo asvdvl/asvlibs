@@ -1,7 +1,0 @@
-#this file is a list for automatically downloading libraries
-#name;version(?);url;last update time in unix(not using)
-init;init.lua;0
-utils;utils.lua;0
-dbg;dbg.lua;0
-settings;settings.lua;0
-time;time.lua;0
