@@ -60,7 +60,7 @@ local function downloadFile(module)
 		fs.makeDirectory(path)
 	end
 	path = path..module..st.filePrefix
-	local libUrlPath = st.mainDirUrl..(st.mainFolder or var[1].."/")..module..st.filePrefix
+	local libUrlPath = st.mainDirUrl..st.branch.."/"..(st.mainFolder or var[1].."/")..module..st.filePrefix
 	success, message = wget("-f", libUrlPath, path)
 	if not success then
 		fs.remove(path)
