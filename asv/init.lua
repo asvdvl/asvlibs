@@ -56,7 +56,7 @@ local function downloadFile(module)
 	--find and download file
 	module:gsub("%.", "/")	  --replase all . on /
 	local path = fs.path(package.searchpath(var[1], package.path))		--some kludge for get current library path
-	if not fs.exist(path) then
+	if not fs.exists(path) then
 		fs.makeDirectory(path)
 	end
 	path = path..module..st.filePrefix
