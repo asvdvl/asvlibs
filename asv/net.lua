@@ -20,7 +20,7 @@ local port = 1 --constant
 --Init modem
 local function modemInit(modem)
     if not modem.open(port) then
-        print("Failed to open port on modem "..addr)
+        print("Failed to open port on modem "..modem.address)
     end
 end
 
