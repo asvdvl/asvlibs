@@ -16,7 +16,7 @@ local st = {
 	branch = "",
 	mainFolder = "",	--if nil of false fallback into asv(folder with library)
 	]]
-	filePrefix = ".lua",
+	urlLibSubPaths = {"?.lua", "?/init.lua", "?/?.lua"},	--"?" - will be replaced with the required module
 	downloadIfNotExist = true,
 	startupMessage = true,
 	log = true,
@@ -52,24 +52,34 @@ if not cmp.isAvailable("internet") then
 end
 
 local function downloadFile(module)
+	local mainLibraryPath = fs.path(package.searchpath(var[1], package.path))		--some kludge for get main init.lua location(this file)
 	local success, message
 	--find and download file
-	module:gsub("%.", "/")	  --replase all . on /
-	local path = fs.path(package.searchpath(var[1], package.path))		--some kludge for get current library path
-	if not fs.exists(path) then
-		fs.makeDirectory(path)
+	module = module:gsub("%.", "/")	  --replase all . on /
+
+	for _, subPath in pairs(st.urlLibSubPaths) do
+		subPath = subPath:gsub("?", module)
+		local searchedModulePath = mainLibraryPath..subPath
+		if not fs.exists(fs.path(searchedModulePath)) then
+			fs.makeDirectory(fs.path(searchedModulePath))
+		end
+
+		local libUrlPath = st.mainDirUrl..st.branch.."/"..(st.mainFolder or var[1].."/")..subPath
+
+		dbgLog("try to download \""..searchedModulePath.."\" by address \""..libUrlPath.."\" ")
+		success = wget("-f", libUrlPath, searchedModulePath)
+		if not success then
+			fs.remove(searchedModulePath)
+		else
+			return
+		end
 	end
-	path = path..module..st.filePrefix
-	local libUrlPath = st.mainDirUrl..st.branch.."/"..(st.mainFolder or var[1].."/")..module..st.filePrefix
-	success, message = wget("-f", libUrlPath, path)
-	if not success then
-		fs.remove(path)
-		error("Error while download file by URL: "..libUrlPath..". "..message)
-	end
+	error("failed get \""..module.."\" module")
 end
 
 local function getLibrary(table, key)
 	local path = package.searchpath(var[1].."."..key, package.path)
+	dbgLog("try to load "..key)
 
 	if cmp.isAvailable("internet") then
 		if st.debug.redownloadOnEachRequire or (not path and st.downloadIfNotExist) then
