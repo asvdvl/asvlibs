@@ -1,7 +1,7 @@
 local event = require("event")
-
+local asv = require("asv")
 local net = {}
-net.phys = require("asv.net.drivers")
-net.l2 = require("asv.net.LinkLayer")
+net.phys = asv("net.drivers")
+net.l2 = asv("net.LinkLayer")
 
 return net
