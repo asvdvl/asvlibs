@@ -100,4 +100,8 @@ function nd.send(srcAddr, dstAddr, ...)
     return pcall(function (srcAddr, dstAddr, ...) nd.getModemFromAddress(srcAddr).asvnet.send(dstAddr, ...) end, srcAddr, dstAddr, ...)
 end
 
+function nd.postInitialization(_)
+    nd.postInitialization = nil
+end
+
 return nd
