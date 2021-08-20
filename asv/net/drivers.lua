@@ -91,13 +91,13 @@ end
 
 function nd.broadcast(srcAddr, ...)
     checkArg(1, srcAddr, "string", "nil")
-    return pcall(function (srcAddr, ...) nd.getModemFromAddress(srcAddr).asvnet.broadcast(...) end, srcAddr, ...)
+    return pcall(function (...) nd.getModemFromAddress(srcAddr).asvnet.broadcast(...) end, ...)
 end
 
 function nd.send(srcAddr, dstAddr, ...)
     checkArg(1, srcAddr, "string", "nil")
     checkArg(2, dstAddr, "string")
-    return pcall(function (srcAddr, dstAddr, ...) nd.getModemFromAddress(srcAddr).asvnet.send(dstAddr, ...) end, srcAddr, dstAddr, ...)
+    return pcall(function (...) nd.getModemFromAddress(srcAddr).asvnet.send(dstAddr, ...) end, ...)
 end
 
 function nd.postInitialization(_)

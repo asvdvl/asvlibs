@@ -2,7 +2,7 @@ local event = require("event")
 local asv = require("asv")
 local net = {}
 net.phys = asv("net.drivers")
-net.l2 = asv("net.LinkLayer")
+net.LL = asv("net.LinkLayer")
 
 -- Post initialization
 for _, submodule in pairs(net) do
