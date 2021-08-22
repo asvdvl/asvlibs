@@ -1,11 +1,11 @@
-local nd = {}   --"nd" is network drivers
+local nd = {service = {}}   --"nd" is network drivers
 local cmp = require("component")
 local event = require("event")
-local port = 1 --constant
+nd.service.port = 1 --constant
 
 --Init modem
 local function modemInit(modem)
-    if not modem.open(port) then
+    if not modem.open(nd.service.port) then
         print("Failed to open port on modem "..modem.address)
     end
 end
@@ -51,10 +51,10 @@ function nd.getModemFromAddress(addr, dontTakeByDefault)    --dontTakeByDefault 
     modem.asvnet = {}
     if cmp.type(modem.address) == "modem" then
         modem.asvnet.send = function (dstAddr, ...)
-            return modem.send(dstAddr, port, ...)
+            return modem.send(dstAddr, nd.service.port, ...)
         end
         modem.asvnet.broadcast = function (...)
-            return modem.broadcast(port, ...)
+            return modem.broadcast(nd.service.port, ...)
         end
     elseif cmp.type(modem.address) == "tunnel" then
         modem.asvnet.send = function (dstAddr, ...)    --dstAddr not using for send via linked card(need for universalize api)
