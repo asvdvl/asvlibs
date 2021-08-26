@@ -5,6 +5,15 @@ local srl = require("serialization")
 local event = require("event")
 local utils = asv.utils
 LL.service.magicWordForChoicePrimary = "primary" --perhaps the keyword needs to be changed or delete
+LL.service.stats = {
+    broadcastedFrames = 0,
+    sendedFrames = 0,
+    receiveEventCalls = 0,
+    droppedWithWrongPort = 0,
+    droppedWithWrongDataType = 0,
+    droppedWithInvalidData = 0,
+    acceptedFrames = 0
+}
 
 LL.protocols = {
     asvNetEthernet = asv("net.LinkLayer.asvNetEthernet"),
@@ -36,6 +45,7 @@ function LL.broadcast(srcAddr, protocol, data)
     else
         net.phys.broadcastViaAll(toSend)
     end
+    LL.service.stats.broadcastedFrames = LL.service.stats.broadcastedFrames + 1
 end
 
 function LL.send(srcAddr, dstAddr, protocol, data)
@@ -52,15 +62,19 @@ function LL.send(srcAddr, dstAddr, protocol, data)
         srcAddr = nil
     end
     net.phys.send(srcAddr, dstAddr, toSend)
+    LL.service.stats.sendedFrames = LL.service.stats.sendedFrames + 1
 end
 
 --receive part
 local function receiveData(_, dstAddr, srcAddr, port, distance, data)
+    LL.service.stats.receiveEventCalls = LL.service.stats.receiveEventCalls + 1
     if port ~= net.phys.service.port then       --just drop before processing
+        LL.service.stats.droppedWithWrongPort = LL.service.stats.droppedWithWrongPort + 1
         return
     end
 
     if type(data) ~= "string" then              --invalid packet, unsupported data
+        LL.service.stats.droppedWithWrongDataType = LL.service.stats.droppedWithWrongDataType + 1
         return
     end
 
@@ -68,10 +82,12 @@ local function receiveData(_, dstAddr, srcAddr, port, distance, data)
     local badPacket
     data, badPacket = utils.correctTableStructure(data, frameItem)
     if badPacket then                           --invalid packet, some parameters is missing
+        LL.service.stats.droppedWithInvalidData = LL.service.stats.droppedWithInvalidData + 1
         return
     end
 
     if LL.protocols[data.protocol].onMessageReceived then
+        LL.service.stats.acceptedFrames = LL.service.stats.acceptedFrames + 1
         LL.protocols[data.protocol].onMessageReceived(dstAddr, srcAddr, data, port, distance)
     end
 end
