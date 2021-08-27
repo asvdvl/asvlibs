@@ -2,9 +2,18 @@ local nd = {service = {}}   --"nd" is network drivers
 local cmp = require("component")
 local event = require("event")
 nd.service.port = 1 --constant
+nd.service.stats = {
+    modemInitCalls = 0,
+    getModemFromAddressCalls = 0,
+    broadcastViaAllCalls = 0,
+    broadcastViaAllErrors = 0,
+    broadcastCalls = 0,
+    sendCalls = 0,
+}
 
 --Init modem
 local function modemInit(modem)
+    nd.service.stats.modemInitCalls = nd.service.stats.modemInitCalls + 1
     if not modem.open(nd.service.port) then
         print("Failed to open port on modem "..modem.address)
     end
@@ -28,6 +37,7 @@ event.listen("component_added", eventComponentAddedProcessing)
 --modem wrapper
 --nd
 function nd.getModemFromAddress(addr, dontTakeByDefault)    --dontTakeByDefault was left experimentally, may be removed in the future
+    nd.service.stats.getModemFromAddressCalls = nd.service.stats.getModemFromAddressCalls + 1
     local modem
     if addr then
         modem = cmp.proxy(cmp.get(addr))
@@ -68,6 +78,7 @@ function nd.getModemFromAddress(addr, dontTakeByDefault)    --dontTakeByDefault 
 end
 
 function nd.broadcastViaAll(...)
+    nd.service.stats.broadcastViaAllCalls = nd.service.stats.broadcastViaAllCalls + 1
     local errors = {n=0}
     for addr in pairs(cmp.list("modem")) do
         local success, reason = nd.broadcast(addr, ...)
@@ -84,6 +95,7 @@ function nd.broadcastViaAll(...)
         end
     end
     if errors.n ~= 0 then
+        nd.service.stats.broadcastViaAllCalls = nd.service.stats.broadcastViaAllCalls + errors.n
         return false, errors
     end
     return true
@@ -91,12 +103,14 @@ end
 
 function nd.broadcast(srcAddr, ...)
     checkArg(1, srcAddr, "string", "nil")
+    nd.service.stats.broadcastCalls = nd.service.stats.broadcastCalls + 1
     return pcall(function (...) nd.getModemFromAddress(srcAddr).asvnet.broadcast(...) end, ...)
 end
 
 function nd.send(srcAddr, dstAddr, ...)
     checkArg(1, srcAddr, "string", "nil")
     checkArg(2, dstAddr, "string")
+    nd.service.stats.sendCalls = nd.service.stats.sendCalls + 1
     return pcall(function (...) nd.getModemFromAddress(srcAddr).asvnet.send(dstAddr, ...) end, ...)
 end
 

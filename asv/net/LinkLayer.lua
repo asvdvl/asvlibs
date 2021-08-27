@@ -86,7 +86,7 @@ local function receiveData(_, dstAddr, srcAddr, port, distance, data)
         return
     end
 
-    if LL.protocols[data.protocol].onMessageReceived then
+    if LL.protocols[data.protocol].onMessageReceived then       --Сhecking the existence of the protocol and the protocol can receive data
         LL.service.stats.acceptedFrames = LL.service.stats.acceptedFrames + 1
         LL.protocols[data.protocol].onMessageReceived(dstAddr, srcAddr, data, port, distance)
     end
