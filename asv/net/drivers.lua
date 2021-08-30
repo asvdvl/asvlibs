@@ -8,7 +8,9 @@ nd.service.stats = {
     broadcastViaAllCalls = 0,
     broadcastViaAllErrors = 0,
     broadcastCalls = 0,
+    broadcastErrors = 0,
     sendCalls = 0,
+    sendErrors = 0,
 }
 
 --Init modem
@@ -104,14 +106,22 @@ end
 function nd.broadcast(srcAddr, ...)
     checkArg(1, srcAddr, "string", "nil")
     nd.service.stats.broadcastCalls = nd.service.stats.broadcastCalls + 1
-    return pcall(function (...) nd.getModemFromAddress(srcAddr).asvnet.broadcast(...) end, ...)
+    local success, reason = pcall(function (...) nd.getModemFromAddress(srcAddr).asvnet.broadcast(...) end, ...)
+    if not success then
+        nd.service.stats.broadcastErrors = nd.service.stats.broadcastErrors + 1
+    end
+    return success, reason
 end
 
 function nd.send(srcAddr, dstAddr, ...)
     checkArg(1, srcAddr, "string", "nil")
     checkArg(2, dstAddr, "string")
     nd.service.stats.sendCalls = nd.service.stats.sendCalls + 1
-    return pcall(function (...) nd.getModemFromAddress(srcAddr).asvnet.send(dstAddr, ...) end, ...)
+    local success, reason = pcall(function (...) nd.getModemFromAddress(srcAddr).asvnet.send(dstAddr, ...) end, ...)
+    if not success then
+        nd.service.stats.sendErrors = nd.service.stats.sendErrors + 1
+    end
+    return success, reason
 end
 
 function nd.postInitialization(_)
