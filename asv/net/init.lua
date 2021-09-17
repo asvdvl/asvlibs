@@ -1,10 +1,18 @@
 local event = require("event")
 local asv = require("asv")
 local net = {}
+net.Layers = {}
+
 net.phys = asv("net.drivers")
-net.LL = asv("net.LinkLayer")
+net.Layers.LL = asv("net.Layers.LinkLayer")
 
 -- Post initialization
+function net.Layers.postInitialization()    --kluge for init layers
+    for _, submodule in pairs(net.Layers) do
+        submodule.postInitialization(net)
+    end
+end
+
 for _, submodule in pairs(net) do
     submodule.postInitialization(net)
 end
