@@ -17,7 +17,7 @@ LL.service.stats = {
 }
 
 LL.protocols = {
-    asvNetEthernet = asv("net.LinkLayer.asvNetEthernet"),
+    asvNetEthernet = asv("net.Layers.LinkLayer.asvNetEthernet"),
     --arp = {}
 }
 
@@ -26,18 +26,21 @@ local frameItem = {
     data = ""
 }
 
+function LL.service.framingData(protocol, data)
+    local frame = utils.deepcopy(frameItem)
+    frame.protocol = protocol
+    frame.data = data
+    return srl.serialize(frame)
+end
+
 --wrapper over drivers
---[[mini TODO: make getting proto name from table]]
 function LL.broadcast(srcAddr, protocol, data)
     checkArg(1, srcAddr, "string", "nil")
     checkArg(2, protocol, "string")
     assert(LL.protocols[protocol], "No such protocol!")
     checkArg(3, data, "boolean", "number", "string", "table")
-    local frame = utils.deepcopy(frameItem)
-    frame.protocol = protocol
-    frame.data = data
 
-    local toSend = srl.serialize(frame)
+    local toSend = LL.service.framingData(protocol, data)
     LL.service.stats.broadcastedFrames = LL.service.stats.broadcastedFrames + 1
     LL.service.stats.transmittedBytes = LL.service.stats.transmittedBytes + #toSend
     if srcAddr then
@@ -57,11 +60,8 @@ function LL.send(srcAddr, dstAddr, protocol, data)
     checkArg(3, protocol, "string")
     assert(LL.protocols[protocol], "No such protocol!")
     checkArg(4, data, "boolean", "number", "string", "table")
-    local frame = utils.deepcopy(frameItem)
-    frame.protocol = protocol
-    frame.data = data
 
-    local toSend = srl.serialize(frame)
+    local toSend = LL.service.framingData(protocol, data)
     if srcAddr == LL.service.magicWordForChoicePrimary then
         srcAddr = nil
     end
@@ -93,7 +93,7 @@ local function receiveData(_, dstAddr, srcAddr, port, distance, data)
 
     if LL.protocols[data.protocol].onMessageReceived then       --Сhecking the existence of the protocol and the protocol can receive data
         LL.service.stats.acceptedFrames = LL.service.stats.acceptedFrames + 1
-        LL.protocols[data.protocol].onMessageReceived(dstAddr, srcAddr, data, port, distance)
+        LL.protocols[data.protocol].onMessageReceived(dstAddr, data, srcAddr, port, distance)
     end
 end
 
