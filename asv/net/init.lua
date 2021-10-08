@@ -5,6 +5,7 @@ net.Layers = {}
 
 net.phys = asv("net.drivers")
 net.Layers.LL = asv("net.Layers.LinkLayer")
+net.Layers.INet = asv("net.Layers.Internet")
 
 -- Post initialization
 function net.Layers.postInitialization()    --kluge for init layers
