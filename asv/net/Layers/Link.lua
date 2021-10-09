@@ -17,7 +17,7 @@ LL.service.stats = {
 }
 
 LL.protocols = {
-    asvNetEthernet = asv("net.Layers.LinkLayer.asvNetEthernet"),
+    asvNetEthernet = asv("net.Layers.Link.asvNetEthernet"),
     --arp = {}
 }
 

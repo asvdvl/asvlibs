@@ -4,7 +4,7 @@ local net = {}
 net.Layers = {}
 
 net.phys = asv("net.drivers")
-net.Layers.LL = asv("net.Layers.LinkLayer")
+net.Layers.LL = asv("net.Layers.Link")
 net.Layers.INet = asv("net.Layers.Internet")
 
 -- Post initialization
