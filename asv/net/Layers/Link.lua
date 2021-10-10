@@ -1,5 +1,5 @@
-local LL = {service = {}}   -- LL - LinkLayer
-local net       --main table
+local LL = {service = {}}   --LL - LinkLayer
+local net                   --main table
 local asv = require("asv")
 local srl = require("serialization")
 local event = require("event")
@@ -43,7 +43,7 @@ function LL.broadcast(srcAddr, protocol, data)
     local toSend = LL.service.framingData(protocol, data)
     LL.service.stats.broadcastedFrames = LL.service.stats.broadcastedFrames + 1
     LL.service.stats.transmittedBytes = LL.service.stats.transmittedBytes + #toSend
-    if srcAddr then
+    if srcAddr and not srcAddr == "" then
         if srcAddr == LL.service.magicWordForChoicePrimary then
             return net.phys.broadcast(nil, toSend)
         else
