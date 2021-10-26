@@ -17,7 +17,7 @@ nd.service.stats = {
 local function modemInit(modem)
     nd.service.stats.modemInitCalls = nd.service.stats.modemInitCalls + 1
     if not modem.open(nd.service.port) then
-        print("Failed to open port on modem "..modem.address)
+        print("Failed to open port on modem(port already open) "..modem.address)
     end
 end
 
