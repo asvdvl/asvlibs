@@ -5,7 +5,7 @@ local asv = require("asv")
 local utils = asv.utils
 local time = asv.time
 local event = require("event")
-local requetTimeout, cache, listItem, requestTable, requestAddress, stats
+local requetTimeout, cache, listItem, requestTable, requestAddress, stats, inPending
 arp.service.stats = {
     getCalls = 0,
     addCalls = 0,
@@ -14,6 +14,9 @@ arp.service.stats = {
     droppedWithWrongDataTable = 0,
     receivedRequests = 0,
     sendResponses = 0,
+    requestAddressCalls = 0,
+    avgResponseTime = 0,
+    acceptedResolutions = 0,
 }
 arp.service.requetTimeout = 3000 --timeout for canceling an attempt to obtain an address
 arp.service.cache = {
@@ -37,16 +40,32 @@ arp.service.requestTable = {
 arp.service.requestWord = "request"
 arp.service.responseWord = "response"
 
+arp.service.inPending = {}
+
 function arp.service.requestAddress(address, protocol, devAddr)
+    stats.requestAddressCalls = stats.requestAddressCalls + 1
     local dataTable = utils.deepcopy(requestTable)
     dataTable.address = address
     dataTable.protocol = protocol
 
-    net.Layers.Link.broadcast(devAddr, myname, dataTable)
+    local success, message = net.Layers.Link.broadcast(devAddr, myname, dataTable)
+    assert(success, message)
+
+    if not inPending[protocol] then
+        inPending[protocol] = {}
+    end
+    inPending[protocol][address] = true     --filler(key used for quick search)
+
     local startTime = time.getRaw()
     while startTime+requetTimeout > time.getRaw() do
         event.pull(1)
         if cache[protocol][address] then
+            stats.avgResponseTime = (stats.avgResponseTime + time.getRaw() - startTime) / stats.requestAddressCalls
+
+            inPending[protocol][address] = nil
+            if not pairs(inPending[protocol])(inPending[protocol]) then     --purge protocol table if empty
+                inPending[protocol] = nil
+            end
             return true, cache[protocol][address]
         end
     end
@@ -61,6 +80,7 @@ function arp.service.buildLinks() --create short links for simplify code
     requestTable = service.requestTable
     requestAddress = service.requestAddress
     stats = service.stats
+    inPending = service.inPending
 end
 
 function arp.get(address, protocol, devAddr, forResponsible)
@@ -156,7 +176,12 @@ function arp.onMessageReceived(dstAddr, frame, srcAddr, port, distance)
             net.Layers.Link.send(dstAddr, srcAddr, myname, sendData)
         end
     elseif data.type == arp.service.responseWord then
-
+        if inPending[data.protocol] then
+            if inPending[data.protocol][data.address] then
+                stats.acceptedResolutions = stats.acceptedResolutions + 1
+                arp.add(data.address, data.protocol, dstAddr, 0, data.data)
+            end
+        end
     end
 end
 
