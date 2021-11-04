@@ -12,8 +12,9 @@ function utils.reverseTable(table)
 end
 
 ---@param bytes table
----return integer
+---return number
 function utils.concatinateBytes(bytes)
+	checkArg(1, bytes, "table")
 	local concatNum = 0
 	for _, val in pairs(bytes) do
 		concatNum = val|(concatNum<<(8))
@@ -24,6 +25,7 @@ end
 ---@param strings table
 ---return string
 function utils.concatinateStrings(strings)
+	checkArg(1, strings, "table")
 	local concatStr = ""
 	for _, val in pairs(strings) do
 		concatStr = concatStr..val
@@ -31,10 +33,12 @@ function utils.concatinateStrings(strings)
 	return concatStr
 end
 
----@param num integer
----@param length integer
+---@param num number
+---@param length number
 ---return table of bytes
 function utils.splitIntoBytes(num, length)
+	checkArg(1, num, "number")
+	checkArg(2, length, "number")
 	--Counting bytes
 	local bytesCount = 0
 	if not length then
@@ -58,9 +62,11 @@ function utils.splitIntoBytes(num, length)
 end
 
 ---@param text string
----@param chunkSize integer
+---@param chunkSize number
 ---return table of chunks
 function utils.splitByChunk(text, chunkSize)
+	checkArg(1, text, "string")
+	checkArg(2, chunkSize, "number")
 	local chunks = {}
 	for i = 1, math.ceil(text:len() / chunkSize) do
 		chunks[i] = text:sub(1, chunkSize)
@@ -71,8 +77,10 @@ end
 
 ---@param verifiableTable table
 ---@param templateTable table
----return table new table and boolean 
+---return table new table and boolean
 function utils.correctTableStructure(verifiableTable, templateTable)
+	checkArg(1, verifiableTable, "table")
+	checkArg(2, templateTable, "table")
 	verifiableTable = setmetatable(verifiableTable, {__index = templateTable})
 	local virTabNew = {}
 	local wasChanged = false
@@ -88,6 +96,8 @@ end
 ---@param msg string
 ---@param yes boolean
 function utils.confirmAction(msg, yes)
+	checkArg(1, msg, "string")
+	checkArg(2, yes, "boolean")
 	if not yes then
 		if not msg then
 			msg = "Do you confirm this action?"
@@ -106,6 +116,7 @@ end
 
 ---@param orig table
 function utils.deepcopy(orig)	--copied from http://lua-users.org/wiki/CopyTable
+	checkArg(1, orig, "table")
 	local copy
 	if type(orig) == 'table' then
 		copy = {}
@@ -122,6 +133,8 @@ end
 ---@param table1 table
 ---@param table2 table
 function utils.concatTables(table1, table2)
+	checkArg(1, table1, "table")
+	checkArg(2, table2, "table")
 	for key, value in pairs(table2) do
 		table1[key] = value
 	end
