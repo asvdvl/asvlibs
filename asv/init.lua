@@ -12,7 +12,7 @@ local st = {
 	mainDirUrl = "https://raw.githubusercontent.com/asvdvl/asvlibs/", --for git
 	branch = "master",
 	--[[tests
-	mainDirUrl = "http://l.l/",
+	mainDirUrl = "http://www.asv.l/",
 	branch = "",
 	mainFolder = "",	--if nil of false fallback into asv(folder with library)
 	]]
@@ -64,7 +64,7 @@ local function downloadFile(module)
 			fs.makeDirectory(fs.path(searchedModulePath))
 		end
 
-		local libUrlPath = st.mainDirUrl..st.branch.."/"..(st.mainFolder or var[1].."/")..subPath
+		local libUrlPath = st.mainDirUrl..st.branch.."/"..(st.mainFolder or var[1]).."/"..subPath
 
 		dbgLog("try to download \""..searchedModulePath.."\" by address \""..libUrlPath.."\" ")
 		success = wget("-f", libUrlPath, searchedModulePath)
