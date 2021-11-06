@@ -35,7 +35,7 @@
 ## LinkLayer
 Модуль является прослойкой между drivers и протоколами этого уровня, подготавливает данные для передачи через сеть.
 
-Префикс модуля: `net.LL`
+Префикс модуля: `net.Layers.Link`
 
 ### `broadcast(srcAddr, protocol, data)`
 Отправка сообщения через указанный сетевой адаптер всем клиентам. (порт - по умолчанию)\
@@ -63,7 +63,7 @@
 `distance: number` - При беспроводной передаче - расстояние до истоника данных. При проводной - `0`.
 
 #### `asvNetEthernet`
-Префикс модуля: `net.LL.protocols.asvNetEthernet`
+Префикс модуля: `net.Layers.Link.protocols.asvNetEthernet`
 
 ##### `broadcast(srcAddr, data)`
 Отправка сообщения через указанный сетевой адаптер всем клиентам.\
@@ -82,17 +82,31 @@
 `srcAddr: string` - Адрес адаптера отправившего сообщение.
 
 #### `arp`
-Префикс модуля: `net.LL.protocols.arp`
+Префикс модуля: `net.Layers.Link.protocols.arp`
 
 ##### `add(address, protocol, devAddr, timeout, data, canBeUsedToAnswer)`
 Добавить адрес в таблицу кэша.
 `address:string, number` - адрес который предполагается искать.
 `protocol:string` - протокол для которого следует делать поиск.
 `devAddr:string, nil` - Полный или частичный адрес адаптера. Если передан `nil` данные отправятся через все интерфейсы.
-`timeout:number, nil` - адрес который предполагается искать.
+`timeout:number, nil` - время, после которого запись удаляется, 0 - не удаляется, nil - время по умолчанию, UNIX формат.
+`data: nil, boolean, number, string, table` - данные.
 `canBeUsedToAnswer:boolean, nil` - адрес который предполагается искать.
 
-##### `remove(address, protocol)`
+##### `remove(address, protocol, keepProtocolTable)`
 Удалить адрес из таблицы кэша.
 `address:string, number` - адрес который предполагается искать.
 `protocol:string` - протокол для которого следует делать поиск.
+`forResponsible:boolean, nil` - (для внутреннего использования, оставлять в nil или false) Не удалять таблицу протокола если она пуста.
+
+##### `get(address, protocol, devAddr, forResponsible)`
+Получить адрес из таблицы кеша или запросить его из сети.
+`address:string, number` - адрес который предполагается искать.
+`protocol:string` - протокол для которого следует делать поиск.
+`devAddr:string, nil` - Полный или частичный адрес адаптера. Если передан `nil` данные отправятся через все интерфейсы.
+`forResponsible:boolean, nil` - (для внутреннего использования, оставлять в nil или false) Искать только в кеше и только с пометкой canBeUsedToAnswer.
+
+##### `onMessageReceived(dstAddr, data, srcAddr)`
+`dstAddr: string` - Адрес адаптера принявшего сообщение.
+`data: string` - Tаблица с данными. Со структурой `frameItem`.
+`srcAddr: string` - Адрес адаптера отправившего сообщение.
