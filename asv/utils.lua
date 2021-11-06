@@ -116,7 +116,6 @@ end
 
 ---@param orig table
 function utils.deepcopy(orig)	--copied from http://lua-users.org/wiki/CopyTable
-	checkArg(1, orig, "table")
 	local copy
 	if type(orig) == 'table' then
 		copy = {}
