@@ -96,7 +96,7 @@ end
 ---@param msg string
 ---@param yes boolean
 function utils.confirmAction(msg, yes)
-	checkArg(1, msg, "string")
+	checkArg(1, msg, "string", "nil")
 	checkArg(2, yes, "boolean")
 	if not yes then
 		if not msg then
