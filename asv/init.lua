@@ -28,7 +28,7 @@ local st = {
 
 if st.startupMessage then
 	io.stdout:write("asv libs init for automatic download and update libs\n")
-	io.stdout:write("if you want to disable this message, change the startupMessage variable in the settings table of the asv/init.lua file\n")
+	io.stdout:write("if you want to disable this message, change the startupMessage variable in the settings table of the /lib/asv/init.lua file\n")
 end
 
 local function dbgLog(message)
