@@ -177,7 +177,7 @@ function arp.onMessageReceived(dstAddr, frame, srcAddr)
             sendData.type = "response"
             sendData.address = data.address
             sendData.protocol = data.protocol
-            sendData.data = item.data
+            sendData.data = (item or {}).data
             net.Layers.Link.send(dstAddr, srcAddr, myname, sendData)
         end
     elseif data.type == arp.service.responseWord then
