@@ -18,7 +18,8 @@ LL.service.stats = {
 
 LL.protocols = {
     asvNetEthernet = asv("net.Layers.Link.asvNetEthernet"),
-    arp = asv("net.Layers.Link.arp")
+    arp = asv("net.Layers.Link.arp"),
+    virtualINetCard = asv("net.Layers.Link.virtualINetCard")
 }
 
 local frameItem = {
