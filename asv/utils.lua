@@ -1,8 +1,13 @@
 local utils = {}
 
+utils.tables = {}
+utils.strings = {}
+utils.math = {}
+utils.other = {}
+
 ---@param table table
 ---return reverse table
-function utils.reverseTable(table)
+function utils.tables.reverseTable(table)
     checkArg(1, table, "table")
     local newTable = {}
     for k, v in ipairs(table) do
@@ -13,7 +18,7 @@ end
 
 ---@param bytes table
 ---return number
-function utils.concatinateBytes(bytes)
+function utils.math.concatinateBytes(bytes)
     checkArg(1, bytes, "table")
     local concatNum = 0
     for _, val in pairs(bytes) do
@@ -24,7 +29,7 @@ end
 
 ---@param strings table
 ---return string
-function utils.concatinateStrings(strings)
+function utils.strings.concatinateStrings(strings)
     checkArg(1, strings, "table")
     local concatStr = ""
     for _, val in pairs(strings) do
@@ -36,7 +41,7 @@ end
 ---@param num number
 ---@param length number
 ---return table of bytes
-function utils.splitIntoBytes(num, length)
+function utils.math.splitIntoBytes(num, length)
     checkArg(1, num, "number")
     checkArg(2, length, "number")
     --Counting bytes
@@ -64,7 +69,7 @@ end
 ---@param text string
 ---@param chunkSize number
 ---return table of chunks
-function utils.splitByChunk(text, chunkSize)
+function utils.strings.splitByChunk(text, chunkSize)
     checkArg(1, text, "string")
     checkArg(2, chunkSize, "number")
     local chunks = {}
@@ -78,7 +83,7 @@ end
 ---@param verifiableTable table
 ---@param templateTable table
 ---return table new table and boolean
-function utils.correctTableStructure(verifiableTable, templateTable)
+function utils.tables.correctTableStructure(verifiableTable, templateTable)
     checkArg(1, verifiableTable, "table")
     checkArg(2, templateTable, "table")
     verifiableTable = setmetatable(verifiableTable, {__index = templateTable})
@@ -95,7 +100,7 @@ end
 
 ---@param msg string
 ---@param yes boolean
-function utils.confirmAction(msg, yes)
+function utils.other.confirmAction(msg, yes)
     checkArg(1, msg, "string", "nil")
     checkArg(2, yes, "boolean")
     if not yes then
@@ -115,7 +120,7 @@ function utils.confirmAction(msg, yes)
 end
 
 ---@param orig table
-function utils.deepcopy(orig)	--copied from http://lua-users.org/wiki/CopyTable
+function utils.tables.deepcopy(orig)	--copied from http://lua-users.org/wiki/CopyTable
     local copy
     if type(orig) == 'table' then
         copy = {}
@@ -131,7 +136,7 @@ end
 
 ---@param table1 table
 ---@param table2 table
-function utils.concatTables(table1, table2)
+function utils.tables.concatTables(table1, table2)
     checkArg(1, table1, "table")
     checkArg(2, table2, "table")
     for key, value in pairs(table2) do
@@ -139,5 +144,26 @@ function utils.concatTables(table1, table2)
     end
     return table1
 end
+
+---@param x number
+---@param precision number
+function utils.math.ceilWithPrecision(x, precision)
+    checkArg(1, x, "number")
+    checkArg(2, precision, "number")
+    local pr = precision
+    x = math.ceil((x*(10^precision)))/(10^precision)
+    return x
+end
+
+--for legacy compatible
+utils.reverseTable = utils.tables.reverseTable
+utils.concatinateBytes = utils.math.concatinateBytes
+utils.concatinateStrings = utils.strings.concatinateStrings
+utils.splitIntoBytes = utils.math.splitIntoBytes
+utils.splitByChunk = utils.strings.splitByChunk
+utils.correctTableStructure = utils.tables.correctTableStructure
+utils.confirmAction = utils.other.confirmAction
+utils.deepcopy = utils.tables.deepcopy
+utils.concatTables = utils.tables.concatTables
 
 return utils
